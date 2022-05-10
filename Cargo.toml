@@ -1,6 +1,6 @@
 [package]
 name = "semver-cli"
-version = "0.1.6"
+version = "1.6.0"
 authors = ["rickycodes <ricky.miller@gmail.com>", "pSox <pSox(a)st8l.com>"]
 edition = "2021"
 description = "A Rust CLI application for working with the semver specification"
