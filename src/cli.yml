@@ -1,5 +1,4 @@
 name: semver
-version: "1.0"
 author: ricky miller <ricky.miller@gmail.com>
 about: A Rust implementation of the https://semver.org/ specification
 args:

@@ -1,36 +1,48 @@
-#[macro_use]
-extern crate clap;
-extern crate semver;
-
-use clap::{App, ArgMatches};
+use clap::{load_yaml, App, ArgMatches};
 use semver::Version;
 
-fn version_ok(version: &str) -> bool {
-    Version::parse(version).is_ok()
-}
+//fn version_ok(version: &str) -> bool {
+//    Version::parse(version).is_ok()
+//}
 
-fn increment_parsed(mut parsed: Version, increment: &str) -> Version {
+fn increment_parsed(
+    mut parsed: Version,
+    increment: &str,
+) -> Version {
     match increment {
-        "none" => parsed.increment_patch(),
-        "patch" => parsed.increment_patch(),
-        "minor" => parsed.increment_minor(),
-        "major" => parsed.increment_major(),
-        _ => parsed.increment_patch(),
+        "minor" => {
+            parsed.patch = 0;
+            parsed.minor += 1
+        }
+        "major" => {
+            parsed.patch = 0;
+            parsed.minor = 0;
+            parsed.major += 1
+        }
+        _ => parsed.patch += 1,
     }
     parsed
 }
 
-fn handle_input(input: &str, matches: &ArgMatches) {
-    if matches.occurrences_of("increment") != 0 {
-        if version_ok(input) {
-            let increment = matches.value_of("increment").unwrap();
-            let parsed = Version::parse(input).unwrap();
-            let incremented = increment_parsed(parsed, increment);
-            return println!("{}", incremented);
-        }
+fn handle_input(
+    input: &str,
+    matches: &ArgMatches,
+) {
+    let parsed = Version::parse(input);
+    if parsed.is_err() {
+        return;
     }
-
-    if version_ok(input) {
+    if matches.occurrences_of("increment") != 0 {
+        println!(
+            "{}",
+            increment_parsed(
+                parsed.unwrap(),
+                matches
+                    .value_of("increment")
+                    .unwrap()
+            )
+        );
+    } else {
         println!("{}", input)
     }
 }
@@ -39,7 +51,9 @@ fn init() {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
     let ref_to_matches = &matches;
-    let input = matches.value_of("INPUT").unwrap();
+    let input = matches
+        .value_of("INPUT")
+        .unwrap();
 
     handle_input(input, ref_to_matches)
 }
@@ -54,7 +68,7 @@ mod test {
 
     #[test]
     fn test_version_ok() {
-        assert_eq!(version_ok("1.2.3"), true);
+        assert!(Version::parse("1.2.3").is_ok());
     }
 
     #[test]
